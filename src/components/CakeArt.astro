@@ -1,0 +1,83 @@
+---
+// A cake drawn in SVG: layer, bundt, tart or loaf, in the colors from src/data/site.ts.
+interface Props {
+  art: "layer" | "bundt" | "tart" | "loaf";
+  colors: { sponge: string; frosting: string; topping: string };
+  label: string;
+}
+const { art, colors: c, label } = Astro.props;
+---
+
+<svg viewBox="0 0 320 240" role="img" aria-label={label}>
+  <rect width="320" height="240" fill="#efe6d8" />
+  <ellipse cx="160" cy="206" rx="128" ry="16" fill="#e2d6c3" />
+  <ellipse cx="160" cy="200" rx="118" ry="14" fill="#fbf7ef" stroke="#d8cab4" />
+  {
+    art === "layer" && (
+      <g>
+        <rect x="72" y="90" width="176" height="104" rx="6" fill={c.frosting} />
+        <rect x="72" y="104" width="176" height="20" fill={c.sponge} />
+        <rect x="72" y="134" width="176" height="20" fill={c.sponge} />
+        <rect x="72" y="164" width="176" height="20" fill={c.sponge} />
+        <path d="M200 90 L248 90 L248 194 L200 194 Z" fill="#000" opacity="0.06" />
+        <ellipse cx="160" cy="90" rx="88" ry="14" fill={c.frosting} />
+        <ellipse cx="160" cy="88" rx="88" ry="12" fill="#fff" opacity="0.35" />
+        {[-60, -30, 0, 30, 60].map((dx) => (
+          <circle cx={160 + dx} cy={86 + Math.abs(dx) / 12} r="7" fill={c.topping} />
+        ))}
+      </g>
+    )
+  }
+  {
+    art === "bundt" && (
+      <g>
+        <path d="M70 190 Q72 110 160 104 Q248 110 250 190 Z" fill={c.sponge} />
+        {[90, 120, 150, 180, 210, 232].map((x) => (
+          <path d={`M${x} 190 Q${x - 4} 140 ${x + 6} 112`} stroke="#000" opacity="0.08" stroke-width="6" fill="none" />
+        ))}
+        <ellipse cx="160" cy="112" rx="34" ry="8" fill="#a77a3a" />
+        <path
+          d="M84 150 Q96 112 160 106 Q224 112 236 150 Q226 140 222 156 Q214 138 204 150 Q196 132 186 146 Q176 130 166 146 Q156 128 146 144 Q136 130 126 148 Q116 134 108 152 Q100 138 92 156 Q88 146 84 150 Z"
+          fill={c.frosting}
+        />
+        <ellipse cx="160" cy="112" rx="26" ry="6" fill="#e9dcc3" />
+      </g>
+    )
+  }
+  {
+    art === "tart" && (
+      <g>
+        <ellipse cx="160" cy="170" rx="116" ry="26" fill="#b5773a" />
+        <ellipse cx="160" cy="160" rx="116" ry="28" fill={c.sponge} />
+        <ellipse cx="160" cy="158" rx="102" ry="22" fill={c.frosting} />
+        {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => {
+          const a = (i / 8) * Math.PI * 2;
+          const x = 160 + Math.cos(a) * 58;
+          const y = 158 + Math.sin(a) * 12;
+          return <ellipse cx={x} cy={y} rx="22" ry="8" transform={`rotate(${(i / 8) * 360} ${x} ${y})`} fill={c.topping} stroke="#b49650" />;
+        })}
+        <circle cx="160" cy="158" r="10" fill={c.topping} stroke="#b49650" />
+      </g>
+    )
+  }
+  {
+    art === "loaf" && (
+      <g>
+        <path d="M82 120 L238 120 L230 194 L90 194 Z" fill={c.sponge} />
+        <path d="M200 120 L238 120 L230 194 L196 194 Z" fill="#000" opacity="0.08" />
+        <path d="M76 120 Q80 96 110 98 Q130 86 160 96 Q190 86 212 98 Q240 96 244 120 Q240 130 230 126 Q220 134 208 126 Q196 134 184 126 Q172 134 160 126 Q148 134 136 126 Q124 134 112 126 Q100 134 90 126 Q80 130 76 120 Z" fill={c.frosting} />
+        {[110, 140, 170, 200].map((x, i) => (
+          <ellipse cx={x} cy={104 + (i % 2) * 4} rx="8" ry="5" fill={c.topping} />
+        ))}
+      </g>
+    )
+  }
+</svg>
+
+<style>
+  svg {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+  }
+</style>

@@ -1,0 +1,187 @@
+---
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+import { menu, allergens } from "../data/site";
+import { money } from "../lib/format";
+---
+
+<Base title="Menu" description="Bread, croissants, buns, cakes by the slice, coffee and tea at Pell & Daughter, with prices and allergens.">
+  <PageHead title="Menu" intro="Everything baked here, every morning. What's left after two is half price." />
+
+  <div class="wrap layout">
+    <nav class="toc" aria-label="Menu sections">
+      <ul>
+        {menu.map((s, i) => <li><a href={`#s${i}`}>{s.title}</a></li>)}
+      </ul>
+      <dl class="key">
+        {
+          Object.entries(allergens).map(([code, name]) => (
+            <div>
+              <dt>{code}</dt>
+              <dd>{name}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </nav>
+
+    <div class="sections">
+      {
+        menu.map((s, i) => (
+          <section id={`s${i}`} aria-labelledby={`s${i}-title`}>
+            <div class="sec-head">
+              <h2 id={`s${i}-title`} class="display">{s.title}</h2>
+              {s.note && <p class="muted">{s.note}</p>}
+            </div>
+            <ul>
+              {s.items.map((it) => (
+                <li>
+                  <div class="line">
+                    <span class="name">{it.name}</span>
+                    <span class="price tnum">{money(it.price)}</span>
+                  </div>
+                  <p class="desc">
+                    {it.desc}
+                    {it.tags.length > 0 && (
+                      <span class="tags" aria-label={`Contains or suits: ${it.tags.map((t) => allergens[t]).join(", ")}`}>
+                        {it.tags.map((t) => <abbr title={allergens[t]}>{t}</abbr>)}
+                      </span>
+                    )}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+      <p class="allergy muted">
+        Our kitchen handles wheat, nuts, dairy, eggs and sesame. Ask at the counter and we'll tell you exactly what's in anything.
+      </p>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .layout {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 64px;
+    padding-bottom: 112px;
+  }
+  .toc {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+    display: grid;
+    gap: 32px;
+  }
+  .toc ul {
+    display: grid;
+    gap: 2px;
+  }
+  .toc a {
+    display: block;
+    padding: 6px 0;
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 15px;
+  }
+  .toc a:hover {
+    color: var(--crust);
+  }
+  .key {
+    display: grid;
+    gap: 4px;
+    font-size: 14px;
+    color: var(--ink-2);
+  }
+  .key div {
+    display: grid;
+    grid-template-columns: 24px 1fr;
+  }
+  .key dt {
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .key dd {
+    margin: 0;
+  }
+  .sections {
+    display: grid;
+    gap: 64px;
+  }
+  section {
+    scroll-margin-top: 24px;
+  }
+  .sec-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--line-strong);
+  }
+  .sec-head h2 {
+    font-size: clamp(28px, 3vw, 36px);
+  }
+  .sec-head p {
+    font-size: 15px;
+  }
+  li {
+    padding-block: 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .line {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .name {
+    font-weight: 500;
+    font-size: 18px;
+  }
+  .line::after {
+    content: none;
+  }
+  .price {
+    margin-left: auto;
+    font-size: 17px;
+  }
+  .desc {
+    margin-top: 2px;
+    color: var(--ink-2);
+    font-size: 16px;
+  }
+  .tags {
+    display: inline-flex;
+    gap: 4px;
+    margin-left: 8px;
+  }
+  abbr {
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-3);
+    border: 1px solid var(--line-strong);
+    border-radius: 4px;
+    padding: 0 5px;
+  }
+  .allergy {
+    font-size: 15px;
+  }
+  @media (max-width: 820px) {
+    .layout {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .toc {
+      position: static;
+    }
+    .toc ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 16px;
+    }
+  }
+</style>

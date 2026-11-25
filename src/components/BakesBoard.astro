@@ -1,0 +1,119 @@
+---
+// The slate by the oven: today's bakes, when each batch came out, and what's gone.
+// Edit `todaysBakes` in src/data/site.ts each morning.
+import { todaysBakes as board } from "../data/site";
+import { money } from "../lib/format";
+---
+
+<figure class="board" aria-labelledby="board-title">
+  <div class="slate">
+    <header>
+      <h2 id="board-title">{board.title}</h2>
+      <p class="tnum">{board.day}, updated {board.updated}</p>
+    </header>
+    <ul>
+      {
+        board.items.map((b) => (
+          <li class:list={{ gone: b.soldOut }}>
+            <span class="out tnum">Out at {b.out}</span>
+            <span class="what">
+              <span class="name">{b.name}</span>
+              {b.soldOut && <span class="sold">sold out</span>}
+            </span>
+            <span class="price tnum">{money(b.price)}</span>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="note">{board.note}</p>
+  </div>
+</figure>
+
+<style>
+  .board {
+    padding: 14px;
+    border-radius: 10px;
+    background: #8a5a34;
+    background: linear-gradient(#9a6840, #7d5130);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.18),
+      0 16px 40px rgb(42 33 24 / 0.18);
+  }
+  .slate {
+    position: relative;
+    padding: clamp(20px, 3vw, 32px);
+    border-radius: 4px;
+    background: var(--slate);
+    color: #ece6da;
+    overflow: hidden;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-bottom: 16px;
+    border-bottom: 1.5px solid rgb(236 230 218 / 0.35);
+  }
+  h2 {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: clamp(26px, 2.6vw, 32px);
+  }
+  header p {
+    font-size: 14px;
+    color: rgb(236 230 218 / 0.7);
+  }
+  ul {
+    display: grid;
+    margin-top: 8px;
+  }
+  li {
+    display: grid;
+    grid-template-columns: 88px 1fr auto;
+    gap: 16px;
+    align-items: baseline;
+    padding-block: 10px;
+    border-bottom: 1px dashed rgb(236 230 218 / 0.16);
+    font-size: 17px;
+  }
+  .out {
+    font-size: 14px;
+    color: #e9c79d;
+  }
+  .what {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    align-items: baseline;
+  }
+  .gone .name,
+  .gone .price {
+    color: rgb(236 230 218 / 0.45);
+    text-decoration: line-through;
+    text-decoration-color: #e3a19b;
+    text-decoration-thickness: 2px;
+  }
+  .gone .out {
+    color: rgb(233 199 157 / 0.5);
+  }
+  .sold {
+    font-size: 14px;
+    color: #e3a19b;
+  }
+  .note {
+    margin-top: 16px;
+    font-size: 15px;
+    color: rgb(236 230 218 / 0.8);
+  }
+  @media (max-width: 420px) {
+    li {
+      grid-template-columns: 1fr auto;
+      gap: 2px 12px;
+    }
+    .out {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

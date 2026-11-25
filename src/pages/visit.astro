@@ -1,0 +1,135 @@
+---
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+import { site, hours, story } from "../data/site";
+import { hoursText } from "../lib/format";
+---
+
+<Base title="Visit" description={`Hours and directions for ${site.legalName}, ${site.address.street}, ${site.address.city}.`}>
+  <PageHead title="Visit the bakery" intro={site.mapNote} />
+
+  <section class="wrap visit" aria-label="Hours and address">
+    <div class="hours">
+      <h2>Hours</h2>
+      <dl>
+        {
+          hours.map((h) => (
+            <div data-day={h.day}>
+              <dt>{h.label}</dt>
+              <dd class="tnum">{hoursText(h)}</dd>
+              {h.note && <dd class="note muted">{h.note}</dd>}
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+    <div class="side">
+      <figure class="map" aria-label="Sketch map of Alder Street and 22nd">
+        <svg viewBox="0 0 400 260" role="img" aria-label="Map: the bakery on the corner of Alder Street and 22nd, across from the library">
+          <rect width="400" height="260" fill="#efe6d8" />
+          <rect x="0" y="112" width="400" height="36" fill="#fffaf2" />
+          <rect x="232" y="0" width="36" height="260" fill="#fffaf2" />
+          <rect x="24" y="24" width="88" height="68" rx="4" fill="#e2d6c3" />
+          <rect x="128" y="24" width="88" height="68" rx="4" fill="#e2d6c3" />
+          <rect x="284" y="24" width="92" height="68" rx="4" fill="#d5e0cf" />
+          <rect x="24" y="168" width="192" height="68" rx="4" fill="#e2d6c3" />
+          <rect x="284" y="168" width="92" height="68" rx="4" fill="#e2d6c3" />
+          <rect x="176" y="168" width="40" height="40" rx="4" fill="#8a4b1c" />
+          <text x="196" y="228" text-anchor="middle" font-size="12" fill="#2a2118" font-family="Albert Sans Variable, sans-serif">Pell &amp; Daughter</text>
+          <text x="330" y="62" text-anchor="middle" font-size="12" fill="#5f5345" font-family="Albert Sans Variable, sans-serif">Library</text>
+          <text x="60" y="135" font-size="12" fill="#5f5345" font-family="Albert Sans Variable, sans-serif">Alder Street</text>
+          <text x="250" y="250" font-size="12" fill="#5f5345" font-family="Albert Sans Variable, sans-serif" transform="rotate(-90 250 250)">22nd Avenue</text>
+        </svg>
+      </figure>
+      <p class="addr">{site.address.street}<br />{site.address.city}, {site.address.region} {site.address.postal}</p>
+      <p><a class="text-link tnum" href={`tel:${site.phoneHref}`}>{site.phone}</a></p>
+      <p>
+        <a class="text-link" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${site.address.street}, ${site.address.city}, ${site.address.region}`)}`} rel="noopener">
+          Directions
+        </a>
+      </p>
+    </div>
+  </section>
+
+  <section class="wrap story" aria-labelledby="story-title">
+    <h2 id="story-title" class="display h2">{story.title}</h2>
+    <div>{story.paragraphs.map((p) => <p>{p}</p>)}</div>
+  </section>
+</Base>
+
+<script>
+  // Highlight today's row in the bakery's week
+  const today = new Date().getDay();
+  document.querySelector(`.hours [data-day="${today}"]`)?.classList.add("today");
+</script>
+
+<style>
+  .visit {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(32px, 6vw, 80px);
+    padding-bottom: 80px;
+  }
+  .hours h2 {
+    font-size: 18px;
+    font-weight: 500;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line-strong);
+  }
+  .hours dl div {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2px 16px;
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  .hours :global(.today) {
+    background: var(--paper);
+    box-shadow: inset 2px 0 0 var(--crust);
+  }
+  dt {
+    color: var(--ink-2);
+  }
+  dd {
+    margin: 0;
+    text-align: right;
+  }
+  .note {
+    grid-column: 1 / -1;
+    text-align: left;
+    font-size: 15px;
+  }
+  .side {
+    display: grid;
+    gap: 12px;
+    align-content: start;
+  }
+  .map svg {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
+  }
+  .addr {
+    margin-top: 8px;
+    font-size: 18px;
+  }
+  .story {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: clamp(32px, 6vw, 80px);
+    padding-block: 64px 112px;
+    border-top: 1px solid var(--line);
+  }
+  .story div {
+    display: grid;
+    gap: 16px;
+    font-size: 18px;
+  }
+  @media (max-width: 860px) {
+    .visit,
+    .story {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

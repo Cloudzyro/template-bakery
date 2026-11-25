@@ -1,0 +1,218 @@
+---
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+import { site, wholesale } from "../data/site";
+import { money } from "../lib/format";
+
+const endpoint = import.meta.env.PUBLIC_FORM_ENDPOINT ?? "";
+const subject = `Wholesale inquiry for ${site.legalName}`;
+---
+
+<Base title="Wholesale" description={wholesale.lede}>
+  <PageHead title={wholesale.headline} intro={wholesale.lede} />
+
+  <section class="wrap facts" aria-label="Delivery and terms">
+    <div>
+      <h2>Delivery</h2>
+      <dl>
+        {
+          wholesale.deliveryDays.map((d) => (
+            <div>
+              <dt>{d.day}</dt>
+              <dd>{d.detail}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+    <div>
+      <h2>Terms</h2>
+      <dl>
+        {
+          wholesale.terms.map((t) => (
+            <div>
+              <dt>{t.label}</dt>
+              <dd>{t.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <section class="wrap prices" aria-labelledby="prices-title">
+    <h2 id="prices-title" class="display h2">Wholesale prices</h2>
+    <table>
+      <thead>
+        <tr><th scope="col">Item</th><th scope="col" class="r">Each</th></tr>
+      </thead>
+      <tbody>
+        {
+          wholesale.products.map((p) => (
+            <tr>
+              <th scope="row">{p.name}</th>
+              <td class="r tnum">{money(p.price)}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </section>
+
+  <section class="wrap start" aria-labelledby="start-title">
+    <div>
+      <h2 id="start-title" class="display h2">How to start</h2>
+      <ol>
+        {wholesale.steps.map((s) => <li>{s}</li>)}
+      </ol>
+    </div>
+    <form
+      class="ws-form"
+      method="post"
+      action={endpoint || `mailto:${site.wholesaleEmail}`}
+      data-endpoint={endpoint}
+      data-email={site.wholesaleEmail}
+      data-subject={subject}
+    >
+      {
+        !endpoint && (
+          <p class="form-note" role="note">
+            This form isn't connected yet, so sending it opens your email app. You can also write to{" "}
+            <a href={`mailto:${site.wholesaleEmail}?subject=${encodeURIComponent(subject)}`}>{site.wholesaleEmail}</a>.
+          </p>
+        )
+      }
+      <input type="hidden" name="_subject" value={subject} />
+      <div class="row">
+        <label class="field"><span>Your name</span><input name="name" autocomplete="name" required /></label>
+        <label class="field"><span>Business</span><input name="business" autocomplete="organization" required /></label>
+      </div>
+      <div class="row">
+        <label class="field"><span>Email</span><input name="email" type="email" autocomplete="email" required /></label>
+        <label class="field"><span>Phone</span><input name="phone" type="tel" autocomplete="tel" /></label>
+      </div>
+      <label class="field"><span>Delivery address</span><input name="address" autocomplete="street-address" /></label>
+      <label class="field">
+        <span>What you'd like, and how often</span>
+        <textarea name="order" rows="4" placeholder="12 baguettes and 2 sourdough, Tuesday to Saturday"></textarea>
+      </label>
+      <div class="actions">
+        <button class="btn btn-primary" type="submit">Ask for a tasting box</button>
+        <p class="form-status" role="status" aria-live="polite"></p>
+      </div>
+    </form>
+  </section>
+</Base>
+
+<script>
+  import { wireForm } from "../lib/form-client";
+  document.querySelectorAll<HTMLFormElement>("form.ws-form").forEach((form) => {
+    wireForm(form, "Thank you. June will be in touch within two working days to arrange a tasting box.");
+  });
+</script>
+
+<style>
+  .facts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    padding-bottom: 64px;
+  }
+  .facts h2 {
+    font-size: 18px;
+    font-weight: 500;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line-strong);
+  }
+  .facts dl div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding-block: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  dt {
+    color: var(--ink-2);
+  }
+  dd {
+    margin: 0;
+    text-align: right;
+  }
+  .prices {
+    padding-block: 64px;
+    border-top: 1px solid var(--line);
+    max-width: 760px;
+    margin-left: max(24px, calc((100% - var(--wrap)) / 2));
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 24px;
+  }
+  th,
+  td {
+    text-align: left;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    font-weight: 400;
+  }
+  thead th {
+    font-size: 14px;
+    color: var(--ink-3);
+    border-bottom-color: var(--line-strong);
+  }
+  .r {
+    text-align: right !important;
+  }
+  .start {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: clamp(32px, 6vw, 80px);
+    padding-block: 64px 112px;
+    border-top: 1px solid var(--line);
+  }
+  ol {
+    margin-top: 24px;
+    display: grid;
+    gap: 16px;
+    counter-reset: step;
+  }
+  ol li {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    color: var(--ink-2);
+    counter-increment: step;
+  }
+  ol li::before {
+    content: counter(step);
+    font-family: var(--display);
+    font-size: 20px;
+    color: var(--crust);
+    line-height: 1.3;
+  }
+  .ws-form {
+    display: grid;
+    gap: 16px;
+    padding: clamp(20px, 4vw, 32px);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+  }
+  .row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  @media (max-width: 860px) {
+    .facts,
+    .start {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

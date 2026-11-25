@@ -1,0 +1,125 @@
+---
+import { site } from "../data/site";
+
+const path = Astro.url.pathname.replace(/\/$/, "") || "/";
+---
+
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="logo" href="/" aria-label={`${site.legalName}, home`}>
+      <span class="name">{site.name}</span>
+      <span class="since tnum">Bakers since {site.founded}</span>
+    </a>
+    <nav aria-label="Main">
+      <ul class="links">
+        {
+          site.nav.map((n) => (
+            <li>
+              <a href={n.href} aria-current={path === n.href ? "page" : undefined}>
+                {n.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <details class="mobile">
+      <summary>Menu</summary>
+      <ul>
+        {site.nav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}
+      </ul>
+    </details>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--line);
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    min-height: 72px;
+  }
+  .logo {
+    display: grid;
+    text-decoration: none;
+    line-height: 1.1;
+  }
+  .name {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 24px;
+    letter-spacing: -0.01em;
+  }
+  .since {
+    font-size: 13px;
+    color: var(--ink-3);
+  }
+  .links {
+    display: flex;
+    gap: 4px;
+  }
+  .links a {
+    display: block;
+    padding: 8px 14px;
+    border-radius: var(--radius);
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 150ms var(--ease), background-color 150ms var(--ease);
+  }
+  .links a:hover {
+    color: var(--ink);
+  }
+  .links a[aria-current="page"] {
+    color: var(--ink);
+    background: var(--raised);
+  }
+  .mobile {
+    display: none;
+    position: relative;
+  }
+  .mobile summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 8px 14px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    font-size: 15px;
+  }
+  .mobile summary::-webkit-details-marker {
+    display: none;
+  }
+  .mobile ul {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    min-width: 200px;
+    padding: 8px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgb(42 33 24 / 0.08);
+    z-index: 20;
+  }
+  .mobile a {
+    display: block;
+    padding: 10px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+  }
+  .mobile a:hover {
+    background: var(--raised);
+  }
+  @media (max-width: 760px) {
+    nav {
+      display: none;
+    }
+    .mobile {
+      display: block;
+    }
+  }
+</style>

@@ -1,0 +1,220 @@
+---
+import Base from "../layouts/Base.astro";
+import BakesBoard from "../components/BakesBoard.astro";
+import CakeArt from "../components/CakeArt.astro";
+import { site, intro, hours, cakes, cakeSizes, cakeOrders, wholesale, story } from "../data/site";
+import { hoursText, money } from "../lib/format";
+
+const featured = cakes.slice(0, 3);
+const fromPrice = Math.min(...cakeSizes.map((s) => s.price));
+---
+
+<Base>
+  <section class="hero wrap">
+    <div class="copy">
+      <h1 class="display h1">{intro.headline}</h1>
+      <p class="lede">{intro.lede}</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="/cakes">Order a cake</a>
+        <a class="btn btn-quiet" href="/menu">See the menu</a>
+      </div>
+      <p class="where muted">{site.address.street}, {site.address.city}. Closed Mondays.</p>
+    </div>
+    <BakesBoard />
+  </section>
+
+  <section class="section cakes-teaser" aria-labelledby="cakes-title">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <h2 id="cakes-title" class="display h2">Cakes to order</h2>
+          <p class="lede">
+            From {money(fromPrice)} for a 6 inch round. Order {cakeOrders.leadHours / 24} days ahead and pick it up in a box with candles.
+          </p>
+        </div>
+        <a class="btn btn-primary" href="/cakes#order">Start a cake order</a>
+      </div>
+      <ul class="cakes">
+        {
+          featured.map((c, i) => (
+            <li class:list={{ big: i === 0 }}>
+              <CakeArt art={c.art} colors={c.colors} label={`Drawing of the ${c.name.toLowerCase()}`} />
+              <h3>{c.name}</h3>
+              <p>{c.desc}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section wrap split" aria-labelledby="story-title">
+    <div>
+      <h2 id="story-title" class="display h2">{story.title}</h2>
+    </div>
+    <div class="story">
+      {story.paragraphs.map((p) => <p>{p}</p>)}
+      <a class="text-link" href="/visit">Hours and how to find us</a>
+    </div>
+  </section>
+
+  <section class="section wholesale-band" aria-labelledby="wholesale-title">
+    <div class="wrap split">
+      <div>
+        <h2 id="wholesale-title" class="display h2">Wholesale</h2>
+        <p class="lede">{wholesale.lede}</p>
+        <a class="btn btn-quiet" href="/wholesale">Wholesale prices and terms</a>
+      </div>
+      <dl class="terms">
+        {
+          wholesale.terms.map((t) => (
+            <div>
+              <dt>{t.label}</dt>
+              <dd>{t.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <section class="section wrap split" aria-labelledby="hours-title">
+    <div>
+      <h2 id="hours-title" class="display h2">Hours</h2>
+      <p class="lede">{site.mapNote}</p>
+    </div>
+    <dl class="hours">
+      {
+        hours.map((h) => (
+          <div>
+            <dt>{h.label}</dt>
+            <dd class="tnum">{hoursText(h)}</dd>
+            {h.note && <dd class="note muted">{h.note}</dd>}
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(32px, 6vw, 88px);
+    align-items: center;
+    padding-block: clamp(40px, 6vw, 80px);
+  }
+  .copy {
+    display: grid;
+    gap: 24px;
+  }
+  .actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .where {
+    font-size: 15px;
+  }
+  .cakes-teaser {
+    background: var(--paper);
+    border-block: 1px solid var(--line);
+  }
+  .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+  .head .lede {
+    margin-top: 12px;
+  }
+  .cakes {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  .cakes h3 {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 22px;
+    margin-top: 16px;
+  }
+  .cakes .big h3 {
+    font-size: 26px;
+  }
+  .cakes p {
+    margin-top: 6px;
+    color: var(--ink-2);
+    font-size: 16px;
+  }
+  .split {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: clamp(32px, 6vw, 88px);
+    align-items: start;
+  }
+  .story {
+    display: grid;
+    gap: 16px;
+    font-size: 18px;
+    justify-items: start;
+  }
+  .wholesale-band {
+    border-top: 1px solid var(--line);
+  }
+  .wholesale-band .lede {
+    margin-block: 16px 24px;
+  }
+  .terms div,
+  .hours div {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2px 16px;
+    padding-block: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .terms div:first-child,
+  .hours div:first-child {
+    border-top: 1px solid var(--line-strong);
+  }
+  dt {
+    color: var(--ink-2);
+  }
+  dd {
+    margin: 0;
+    text-align: right;
+  }
+  .hours .note {
+    grid-column: 1 / -1;
+    text-align: left;
+    font-size: 15px;
+  }
+  .hours-title + .lede {
+    margin-top: 16px;
+  }
+  #hours-title + .lede {
+    margin-top: 16px;
+  }
+  @media (max-width: 900px) {
+    .hero,
+    .split {
+      grid-template-columns: 1fr;
+    }
+    .cakes {
+      grid-template-columns: 1fr 1fr;
+    }
+    .cakes .big {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (max-width: 560px) {
+    .cakes {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,106 @@
+---
+import { site, hours } from "../data/site";
+import { hoursText } from "../lib/format";
+---
+
+<footer class="site-footer">
+  <div class="wrap grid">
+    <div>
+      <p class="name">{site.legalName}</p>
+      <p class="muted">{site.address.street}<br />{site.address.city}, {site.address.region} {site.address.postal}</p>
+    </div>
+    <div>
+      <h2>Hours</h2>
+      <dl>
+        {
+          hours.map((h) => (
+            <div>
+              <dt>{h.label}</dt>
+              <dd class="tnum">{hoursText(h)}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+    <div>
+      <h2>Get in touch</h2>
+      <p><a href={`tel:${site.phoneHref}`} class="tnum">{site.phone}</a></p>
+      <p><a href={`mailto:${site.email}`}>{site.email}</a></p>
+      <p><a href={site.instagram} rel="noopener">Instagram</a></p>
+    </div>
+    <div>
+      <h2>Pages</h2>
+      <ul>
+        {site.nav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}
+      </ul>
+    </div>
+  </div>
+  <p class="wrap legal">&copy; {new Date().getFullYear()} {site.legalName}</p>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--line-strong);
+    padding-top: 56px;
+    font-size: 15px;
+    background: var(--raised);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1.4fr 1fr 0.8fr;
+    gap: 32px;
+  }
+  .name {
+    font-family: var(--display);
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+  h2 {
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+  dl div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding-block: 2px;
+  }
+  dt {
+    color: var(--ink-2);
+  }
+  dd {
+    margin: 0;
+  }
+  p + p {
+    margin-top: 6px;
+  }
+  ul {
+    display: grid;
+    gap: 6px;
+  }
+  a {
+    text-decoration: none;
+  }
+  a:hover {
+    color: var(--crust);
+    text-decoration: underline;
+  }
+  .legal {
+    margin-top: 48px;
+    padding-block: 20px;
+    border-top: 1px solid var(--line);
+    color: var(--ink-3);
+    font-size: 14px;
+  }
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (max-width: 520px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

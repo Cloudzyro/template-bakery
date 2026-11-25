@@ -1,0 +1,273 @@
+---
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+import CakeArt from "../components/CakeArt.astro";
+import { site, cakes, cakeFlavors, cakeSizes, cakeOrders } from "../data/site";
+import { money } from "../lib/format";
+
+// Sends to PUBLIC_FORM_ENDPOINT, or opens the visitor's email app when it isn't set.
+const endpoint = import.meta.env.PUBLIC_FORM_ENDPOINT ?? "";
+const subject = `Cake order for ${site.legalName}`;
+---
+
+<Base title="Cakes to order" description={`Layer cakes, bundts, tarts and loaf cakes made to order at ${site.legalName}. Order ${cakeOrders.leadHours / 24} days ahead.`}>
+  <PageHead
+    title="Cakes to order"
+    intro={`Birthday cakes, small wedding cakes and office loaves, baked the morning you pick them up. Order at least ${cakeOrders.leadHours / 24} days ahead.`}
+  />
+
+  <section class="wrap" aria-labelledby="cakes-title">
+    <h2 id="cakes-title" class="sr">Our cakes</h2>
+    <ul class="gallery">
+      {
+        cakes.map((c) => (
+          <li>
+            <CakeArt art={c.art} colors={c.colors} label={`Drawing of the ${c.name.toLowerCase()}`} />
+            <h3>{c.name}</h3>
+            <p>{c.desc}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="wrap sizes-wrap" aria-labelledby="sizes-title">
+    <h2 id="sizes-title" class="display h2">Sizes and prices</h2>
+    <table class="sizes">
+      <thead>
+        <tr><th scope="col">Size</th><th scope="col">Serves</th><th scope="col" class="r">Price</th></tr>
+      </thead>
+      <tbody>
+        {
+          cakeSizes.map((s) => (
+            <tr>
+              <th scope="row">{s.label}</th>
+              <td class="tnum">{s.serves}</td>
+              <td class="r tnum">{money(s.price)}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+    <p class="muted small">Tarts come in one size. Fresh flowers and gold leaf are extra; ask in your note.</p>
+  </section>
+
+  <section id="order" class="wrap order" aria-labelledby="order-title">
+    <div class="order-copy">
+      <h2 id="order-title" class="display h2">Order a cake</h2>
+      <ul class="notes">
+        {cakeOrders.notes.map((n) => <li>{n}</li>)}
+      </ul>
+    </div>
+
+    <form
+      class="cake-form"
+      method="post"
+      action={endpoint || `mailto:${site.email}`}
+      data-endpoint={endpoint}
+      data-email={site.email}
+      data-subject={subject}
+      data-lead={cakeOrders.leadHours}
+    >
+      {
+        !endpoint && (
+          <p class="form-note" role="note">
+            This form isn't connected yet, so sending it opens your email app. You can also write to{" "}
+            <a href={`mailto:${site.email}?subject=${encodeURIComponent(subject)}`}>{site.email}</a>.
+          </p>
+        )
+      }
+      <input type="hidden" name="_subject" value={subject} />
+      <div class="row">
+        <label class="field"><span>Your name</span><input name="name" autocomplete="name" required /></label>
+        <label class="field"><span>Email</span><input name="email" type="email" autocomplete="email" required /></label>
+      </div>
+      <label class="field"><span>Phone <span class="hint">(in case we have a question)</span></span><input name="phone" type="tel" autocomplete="tel" /></label>
+      <div class="row">
+        <label class="field">
+          <span>Flavor</span>
+          <select name="flavor">{cakeFlavors.map((f) => <option>{f}</option>)}</select>
+        </label>
+        <label class="field">
+          <span>Size</span>
+          <select name="size">
+            {cakeSizes.map((s) => <option value={s.label}>{s.label}, serves {s.serves}, {money(s.price)}</option>)}
+          </select>
+        </label>
+      </div>
+      <div class="row">
+        <label class="field">
+          <span>Pickup date</span>
+          <input name="pickup_date" type="date" required aria-describedby="lead-help" />
+        </label>
+        <label class="field">
+          <span>Pickup time</span>
+          <select name="pickup_time">{cakeOrders.pickupWindows.map((w) => <option>{w}</option>)}</select>
+        </label>
+      </div>
+      <p id="lead-help" class="muted small lead-help">The earliest pickup date is {cakeOrders.leadHours / 24} days from today.</p>
+      <label class="field">
+        <span>Writing on the cake <span class="hint">(up to {cakeOrders.messageMax} letters)</span></span>
+        <input name="message_on_cake" maxlength={cakeOrders.messageMax} data-count />
+        <span class="count muted tnum" aria-live="polite">0 of {cakeOrders.messageMax}</span>
+      </label>
+      <label class="field">
+        <span>Anything else <span class="hint">(allergies, colors, the occasion)</span></span>
+        <textarea name="notes" rows="4"></textarea>
+      </label>
+      <div class="actions">
+        <button class="btn btn-primary" type="submit">Send cake order</button>
+        <p class="form-status" role="status" aria-live="polite"></p>
+      </div>
+    </form>
+  </section>
+</Base>
+
+<script>
+  import { wireForm } from "../lib/form-client";
+
+  document.querySelectorAll<HTMLFormElement>("form.cake-form").forEach((form) => {
+    const leadHours = Number(form.dataset.lead ?? 72);
+    const dateInput = form.elements.namedItem("pickup_date") as HTMLInputElement;
+    const earliest = new Date(Date.now() + leadHours * 3600 * 1000);
+    const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    // Round up to the next whole day so the lead time is always met
+    earliest.setHours(0, 0, 0, 0);
+    earliest.setDate(earliest.getDate() + 1);
+    dateInput.min = iso(earliest);
+
+    const counted = form.querySelector<HTMLInputElement>("[data-count]");
+    const count = form.querySelector<HTMLElement>(".count");
+    counted?.addEventListener("input", () => {
+      if (count) count.textContent = `${counted.value.length} of ${counted.maxLength}`;
+    });
+
+    wireForm(form, "Thank you. We'll email to confirm your cake and the total within a working day.", () => {
+      if (dateInput.value && dateInput.value < dateInput.min) {
+        return `Please choose a pickup date from ${new Date(dateInput.min + "T12:00").toLocaleDateString("en-US", { month: "long", day: "numeric" })}. We need ${leadHours / 24} days for every cake.`;
+      }
+      return null;
+    });
+  });
+</script>
+
+<style>
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px 24px;
+    padding-bottom: 80px;
+  }
+  .gallery h3 {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 22px;
+    margin-top: 16px;
+  }
+  .gallery p {
+    margin-top: 6px;
+    color: var(--ink-2);
+    font-size: 16px;
+  }
+  .sizes-wrap {
+    display: grid;
+    gap: 24px;
+    padding-block: 64px;
+    border-top: 1px solid var(--line);
+    max-width: 760px;
+    margin-left: max(24px, calc((100% - var(--wrap)) / 2));
+  }
+  .sizes {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .sizes th,
+  .sizes td {
+    text-align: left;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    font-weight: 400;
+  }
+  .sizes thead th {
+    font-size: 14px;
+    color: var(--ink-3);
+    border-bottom-color: var(--line-strong);
+  }
+  .sizes tbody th {
+    font-weight: 500;
+  }
+  .r {
+    text-align: right !important;
+  }
+  .small {
+    font-size: 15px;
+  }
+  .order {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: clamp(32px, 6vw, 80px);
+    padding-block: 64px 112px;
+    border-top: 1px solid var(--line);
+    scroll-margin-top: 16px;
+  }
+  .notes {
+    display: grid;
+    gap: 12px;
+    margin-top: 24px;
+    color: var(--ink-2);
+  }
+  .notes li {
+    padding-left: 20px;
+    position: relative;
+  }
+  .notes li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 12px;
+    width: 8px;
+    height: 1.5px;
+    background: var(--crust);
+  }
+  .cake-form {
+    display: grid;
+    gap: 16px;
+    padding: clamp(20px, 4vw, 32px);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+  }
+  .row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .lead-help {
+    margin-top: -8px;
+    font-size: 14px;
+  }
+  .count {
+    font-size: 13px;
+    font-weight: 400;
+    justify-self: end;
+  }
+  .actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  @media (max-width: 900px) {
+    .gallery {
+      grid-template-columns: 1fr 1fr;
+    }
+    .order {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 560px) {
+    .gallery {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

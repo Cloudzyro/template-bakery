@@ -18,7 +18,7 @@ const fromPrice = Math.min(...cakeSizes.map((s) => s.price));
         <a class="btn btn-primary" href="/cakes">Order a cake</a>
         <a class="btn btn-quiet" href="/menu">See the menu</a>
       </div>
-      <p class="where muted">{site.address.street}, {site.address.city}. Closed Mondays.</p>
+      <p class="where muted">{site.address.street}, {site.address.city}, across from the library</p>
     </div>
     <BakesBoard />
   </section>
@@ -193,9 +193,6 @@ const fromPrice = Math.min(...cakeSizes.map((s) => s.price));
     grid-column: 1 / -1;
     text-align: left;
     font-size: 15px;
-  }
-  .hours-title + .lede {
-    margin-top: 16px;
   }
   #hours-title + .lede {
     margin-top: 16px;

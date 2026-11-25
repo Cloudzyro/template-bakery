@@ -91,7 +91,7 @@ const subject = `Cake order for ${site.legalName}`;
         <label class="field">
           <span>Size</span>
           <select name="size">
-            {cakeSizes.map((s) => <option value={s.label}>{s.label}, serves {s.serves}, {money(s.price)}</option>)}
+            {cakeSizes.map((s) => <option value={s.label}>{s.label}, {money(s.price)}</option>)}
           </select>
         </label>
       </div>
@@ -226,7 +226,7 @@ const subject = `Cake order for ${site.legalName}`;
     left: 0;
     top: 12px;
     width: 8px;
-    height: 1.5px;
+    height: 2px;
     background: var(--crust);
   }
   .cake-form {
